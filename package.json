@@ -1,0 +1,31 @@
+{
+  "name": "project-assign-bot",
+  "version": "1.0.0",
+  "private": true,
+  "description": "A bot that assigns issues to projects based on labesl",
+  "author": "Loba <ajidevelop@gmail.com>",
+  "license": "ISC",
+  "repository": "https://github.com/ajidevelop/project-assign-bot.git",
+  "homepage": "https://github.com/ajidevelop/project-assign-bot",
+  "bugs": "https://github.com/ajidevelop/project-assign-bot/issues",
+  "keywords": [
+    "probot",
+    "github",
+    "probot-app"
+  ],
+  "scripts": {
+    "start": "probot run ./index.js",
+    "test": "jest"
+  },
+  "dependencies": {
+    "probot": "^10.1.0"
+  },
+  "devDependencies": {
+    "jest": "^26.4.0",
+    "nock": "^13.0.4",
+    "smee-client": "^1.1.0"
+  },
+  "engines": {
+    "node": ">= 10.13.0"
+  }
+}
