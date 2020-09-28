@@ -14,6 +14,7 @@ module.exports = app => {
 		let owner = payload.issue.user.login
 		let repo = payload.repository.name
 		let issue_number = payload.issue.number
+		let issue_id = payload.issue.id
 		let labels = await github.issues.listLabelsOnIssue({owner, repo, issue_number})
 		for (let i in labels.data) {
 			let data = labels.data[i]
@@ -24,9 +25,11 @@ module.exports = app => {
 
 		let projects = await github.projects.listForRepo({owner, repo})
 		let project_id = projects.data[0].id
-		let project = await github.projects.listColumns({project_id})
-		let column = await github.projects.listCards({project_id: project.data[0].id})
-		console.log(column)
+		let columns = await github.projects.listColumns({project_id})
+		let column_id = columns.data[0].id
+
+		// let response = await github.projects.createCard({column_id, content_id: issue_id, content_type: 'Issue'})
+		// const config = await context.config('project-assign.yml')
 
 
 	})
