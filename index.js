@@ -3,40 +3,54 @@
  * @param {import('probot').Application} app
  */
 module.exports = app => {
-	// Your code here
-	app.log.info('Yay, the app was loaded!')
 
-	app.on('issues.edited', async context => {
+	app.on(['issues.opened', "issues.labeled"], async context => {
 		let github = context.github
 		let payload = context.payload
+		const config = await context.config('project-assign.yml')
+
+		async function getLabelsList() {
+			let labels = await github.issues.listLabelsOnIssue({owner, repo, issue_number})
+			labels = labels.data
+			let labels_list = []
+			for (let i in labels) {
+				labels_list[i] = labels[i].name
+			}
+
+			return labels_list
+		}
 
 
 		let owner = payload.issue.user.login
 		let repo = payload.repository.name
 		let issue_number = payload.issue.number
-		let issue_id = payload.issue.id
-		let labels = await github.issues.listLabelsOnIssue({owner, repo, issue_number})
-		for (let i in labels.data) {
-			let data = labels.data[i]
-			var isBug = data.name === 'bug'
-			if (isBug)
-				break;
+		let target_labels = await getLabelsList()
+		let target_name = ''
+
+		for (let project in config) {
+			let labels = config[project].labels
+			for (let label of labels) {
+				if (target_labels.includes(label)) {
+					target_name = project
+				}
+			}
 		}
 
 		let projects = await github.projects.listForRepo({owner, repo})
-		let project_id = projects.data[0].id
+		let project_id = 0
+
+		for (let i = 0; i < projects.data.length; i++) {
+			let project = projects.data[i]
+			if (project.name === target_name) {
+				project_id = project.id
+				break
+			}
+		}
+
 		let columns = await github.projects.listColumns({project_id})
 		let column_id = columns.data[0].id
+		let issue_id = payload.issue.id
 
-		// let response = await github.projects.createCard({column_id, content_id: issue_id, content_type: 'Issue'})
-		// const config = await context.config('project-assign.yml')
-
-
+		await github.projects.createCard({column_id, content_id: issue_id, content_type: 'Issue'})
 	})
-
-	// For more information on building apps:
-	// https://probot.github.io/docs/
-
-	// To get your app running against GitHub, see:
-	// https://probot.github.io/docs/development/
 }
